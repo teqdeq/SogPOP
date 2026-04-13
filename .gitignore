@@ -16,6 +16,13 @@ SogPOP/*.dll
 SogPOP/*.pdb
 SogPOP/*.ilk
 
+# Obsolete debug DLLs kept out of git to avoid confusion
+SogPOP/Debug/SogPOP.dll
+SogPOP/Debug/SogPOP_test.dll
+SogPOP/Debug/SogPOP_test_color.dll
+SogPOP/Debug/SogPOP_test_schema.dll
+SogPOP/Debug/SogPOP_test_shn.dll
+
 # Visual Studio local state
 SogPOP/.vs/
 SogPOP/*.suo
