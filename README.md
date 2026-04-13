@@ -3,10 +3,13 @@
 TouchDesigner `.sog` importer and preview renderer for SuperSplat-style exports.
 
 Quick start:
-- Recommended test DLL: [SogPOP/Debug/SogPOP_test_clean.dll](SogPOP/Debug/SogPOP_test_clean.dll)
+- Recommended DLL: [SogPOP/Debug/SogPOP.dll](SogPOP/Debug/SogPOP.dll)
 - Sample file: [cluster fly XL.sog](cluster%20fly%20XL.sog)
 - Importer setup: [SogPOP/README.md](SogPOP/README.md)
 - Preview renderer setup: [SogPreviewRenderer/README.md](SogPreviewRenderer/README.md)
+
+Compatibility note:
+- The included DLL is built for 64-bit TouchDesigner 2025.32460. If another machine reports `failed to load plugin`, first verify it is running a compatible 64-bit TouchDesigner 2025 build.
 
 Included in this repository:
 - `SogPOP/`: the self-contained CPlusPlus POP project, including vendored dependencies needed to build on another computer
