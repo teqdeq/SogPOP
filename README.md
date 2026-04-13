@@ -10,6 +10,9 @@ Quick start:
 
 Compatibility note:
 - The included DLL is built for 64-bit TouchDesigner 2025.32460. If another machine reports `failed to load plugin`, first verify it is running a compatible 64-bit TouchDesigner 2025 build.
+- If TouchDesigner only shows a generic load failure, run this on that machine to get the real Windows loader error:
+- `powershell -ExecutionPolicy Bypass -File .\tools\check_plugin_load.ps1 .\SogPOP\Debug\SogPOP.dll`
+- The current build imports `CreateFile2` and `GetSystemTimePreciseAsFileTime`, so Windows 8+ is required.
 
 Included in this repository:
 - `SogPOP/`: the self-contained CPlusPlus POP project, including vendored dependencies needed to build on another computer
