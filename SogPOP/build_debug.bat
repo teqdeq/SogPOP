@@ -20,7 +20,7 @@ cl /nologo /std:c++17 /EHsc /LD ^
 	/Ithird_party\nlohmann ^
 	/Ithird_party\libwebp ^
 	/Ithird_party\libwebp\src ^
-	/DWIN32 /D_WINDOWS /D_USRDLL /DSOGPOP_EXPORTS /DHAVE_CONFIG_H ^
+	/DWIN32 /D_WINDOWS /D_USRDLL /DSOGPOP_EXPORTS /DHAVE_CONFIG_H /DWINVER=0x0601 /D_WIN32_WINNT=0x0601 ^
 	SogImporter.cpp ^
 	third_party\miniz_repo\miniz.c ^
 	third_party\miniz_repo\miniz_tdef.c ^

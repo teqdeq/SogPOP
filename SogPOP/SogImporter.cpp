@@ -1082,6 +1082,7 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 {
 	POP_SetBufferInfo sinfo;
 	std::vector<Color> colorRgba(cache.size());
+	std::vector<float> shArray(cache.size() * 15U * 3U, 0.0f);
 	for (uint32_t pointIndex = 0; pointIndex < cache.size(); ++pointIndex)
 	{
 		const size_t colorIndex = static_cast<size_t>(pointIndex) * 3U;
@@ -1090,15 +1091,21 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 			cache.colors[colorIndex + 1],
 			cache.colors[colorIndex + 2],
 			cache.alphas[pointIndex]);
+
+		if (!cache.shCoefficients.empty())
+		{
+			const size_t sourceBase = static_cast<size_t>(pointIndex) * kHigherOrderShTripletCount * 3U;
+			const size_t destBase = static_cast<size_t>(pointIndex) * 15U * 3U;
+			const size_t copyCount = std::min<size_t>(kHigherOrderShTripletCount * 3U, cache.shCoefficients.size() - sourceBase);
+			std::copy_n(cache.shCoefficients.data() + sourceBase, copyCount, shArray.data() + destBase);
+		}
 	}
 
 	OP_SmartRef<POP_Buffer> positionBuffer = copyBuffer(myContext, cache.positions.data(), cache.size());
 	OP_SmartRef<POP_Buffer> scaleBuffer = copyBuffer(myContext, cache.scales.data(), cache.size());
-	OP_SmartRef<POP_Buffer> quatBuffer = copyBuffer(myContext, cache.quaternions.data(), cache.size() * 4U);
-	OP_SmartRef<POP_Buffer> displayColorBuffer = copyBuffer(myContext, colorRgba.data(), cache.size());
-	OP_SmartRef<POP_Buffer> colorBuffer = copyBuffer(myContext, cache.colors.data(), cache.size() * 3U);
-	OP_SmartRef<POP_Buffer> alphaBuffer = copyBuffer(myContext, cache.alphas.data(), cache.size());
-	OP_SmartRef<POP_Buffer> normalBuffer = copyBuffer(myContext, cache.normals.data(), cache.size());
+	OP_SmartRef<POP_Buffer> rotBuffer = copyBuffer(myContext, cache.quaternions.data(), cache.size() * 4U);
+	OP_SmartRef<POP_Buffer> colorBuffer = copyBuffer(myContext, colorRgba.data(), cache.size());
+	OP_SmartRef<POP_Buffer> shBuffer = copyBuffer(myContext, shArray.data(), static_cast<uint32_t>(shArray.size()));
 	OP_SmartRef<POP_Buffer> indexBuffer = createPointIndexBuffer(cache.size());
 
 	POP_AttributeInfo posInfo;
@@ -1115,65 +1122,27 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 	scaleInfo.attribClass = POP_AttributeClass::Point;
 	output->setAttribute(&scaleBuffer, scaleInfo, sinfo, nullptr);
 
-	POP_AttributeInfo quatInfo;
-	quatInfo.name = "quat";
-	quatInfo.numComponents = 4;
-	quatInfo.type = POP_AttributeType::Float;
-	quatInfo.attribClass = POP_AttributeClass::Point;
-	output->setAttribute(&quatBuffer, quatInfo, sinfo, nullptr);
-
 	POP_AttributeInfo colorInfo;
-	colorInfo.name = "CD";
-	colorInfo.numComponents = 3;
+	colorInfo.name = "Color";
+	colorInfo.numComponents = 4;
 	colorInfo.type = POP_AttributeType::Float;
 	colorInfo.attribClass = POP_AttributeClass::Point;
 	output->setAttribute(&colorBuffer, colorInfo, sinfo, nullptr);
 
-	POP_AttributeInfo displayColorInfo;
-	displayColorInfo.name = "Color";
-	displayColorInfo.numComponents = 4;
-	displayColorInfo.type = POP_AttributeType::Float;
-	displayColorInfo.attribClass = POP_AttributeClass::Point;
-	output->setAttribute(&displayColorBuffer, displayColorInfo, sinfo, nullptr);
+	POP_AttributeInfo rotInfo;
+	rotInfo.name = "rot";
+	rotInfo.numComponents = 4;
+	rotInfo.type = POP_AttributeType::Float;
+	rotInfo.attribClass = POP_AttributeClass::Point;
+	output->setAttribute(&rotBuffer, rotInfo, sinfo, nullptr);
 
-	POP_AttributeInfo alphaInfo;
-	alphaInfo.name = "alpha";
-	alphaInfo.numComponents = 1;
-	alphaInfo.type = POP_AttributeType::Float;
-	alphaInfo.attribClass = POP_AttributeClass::Point;
-	output->setAttribute(&alphaBuffer, alphaInfo, sinfo, nullptr);
-
-	POP_AttributeInfo normalInfo;
-	normalInfo.name = "N";
-	normalInfo.numComponents = 3;
-	normalInfo.type = POP_AttributeType::Float;
-	normalInfo.qualifier = POP_AttributeQualifier::Direction;
-	normalInfo.attribClass = POP_AttributeClass::Point;
-	output->setAttribute(&normalBuffer, normalInfo, sinfo, nullptr);
-
-	if (!cache.shCoefficients.empty())
-	{
-		for (uint32_t tripletIndex = 0; tripletIndex < kHigherOrderShTripletCount; ++tripletIndex)
-		{
-			std::vector<float> shAttribute(cache.size() * 3U, 0.0f);
-			for (uint32_t pointIndex = 0; pointIndex < cache.size(); ++pointIndex)
-			{
-				const size_t sourceIndex = (static_cast<size_t>(pointIndex) * kHigherOrderShTripletCount + tripletIndex) * 3U;
-				const size_t destIndex = static_cast<size_t>(pointIndex) * 3U;
-				shAttribute[destIndex + 0] = cache.shCoefficients[sourceIndex + 0];
-				shAttribute[destIndex + 1] = cache.shCoefficients[sourceIndex + 1];
-				shAttribute[destIndex + 2] = cache.shCoefficients[sourceIndex + 2];
-			}
-
-			OP_SmartRef<POP_Buffer> shBuffer = copyBuffer(myContext, shAttribute.data(), cache.size() * 3U);
-			POP_AttributeInfo shInfo;
-			shInfo.name = kHigherOrderShNames[tripletIndex];
-			shInfo.numComponents = 3;
-			shInfo.type = POP_AttributeType::Float;
-			shInfo.attribClass = POP_AttributeClass::Point;
-			output->setAttribute(&shBuffer, shInfo, sinfo, nullptr);
-		}
-	}
+	POP_AttributeInfo shInfo;
+	shInfo.name = "sh";
+	shInfo.numComponents = 3;
+	shInfo.arraySize = 15;
+	shInfo.type = POP_AttributeType::Float;
+	shInfo.attribClass = POP_AttributeClass::Point;
+	output->setAttribute(&shBuffer, shInfo, sinfo, nullptr);
 
 	POP_IndexBufferInfo indexInfo;
 	indexInfo.type = POP_IndexType::UInt32;
