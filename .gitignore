@@ -7,7 +7,6 @@
 !SogPreviewRenderer/**
 
 # Build outputs
-SogPOP/Debug/
 SogPOP/*.obj
 SogPOP/*.lib
 SogPOP/*.exp
