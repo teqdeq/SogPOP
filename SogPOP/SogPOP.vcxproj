@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D4B1D60F-7DF2-4D1D-9F72-4CF0CDB45B6F}</ProjectGuid>
+    <RootNamespace>SogPOP</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>SogPOP</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v170</PlatformToolset>
+    <VCToolsVersion>14.50.35717</VCToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v170</PlatformToolset>
+    <VCToolsVersion>14.50.35717</VCToolsVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;SOGPOP_EXPORTS;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader></PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>.;third_party\miniz_repo;third_party\nlohmann;third_party\libwebp;third_party\libwebp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SOGPOP_EXPORTS;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader></PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>.;third_party\miniz_repo;third_party\nlohmann;third_party\libwebp;third_party\libwebp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="SogImporter.cpp" />
+    <ClCompile Include="third_party\miniz_repo\miniz.c" />
+    <ClCompile Include="third_party\miniz_repo\miniz_tdef.c" />
+    <ClCompile Include="third_party\miniz_repo\miniz_tinfl.c" />
+    <ClCompile Include="third_party\miniz_repo\miniz_zip.c" />
+    <ClCompile Include="third_party\libwebp\src\dec\alpha_dec.c" />
+    <ClCompile Include="third_party\libwebp\src\dec\buffer_dec.c" />
+    <ClCompile Include="third_party\libwebp\src\dec\frame_dec.c" />
+    <ClCompile Include="third_party\libwebp\src\dec\idec_dec.c" />
+    <ClCompile Include="third_party\libwebp\src\dec\io_dec.c" />
+    <ClCompile Include="third_party\libwebp\src\dec\quant_dec.c" />
+    <ClCompile Include="third_party\libwebp\src\dec\tree_dec.c" />
+    <ClCompile Include="third_party\libwebp\src\dec\vp8_dec.c" />
+    <ClCompile Include="third_party\libwebp\src\dec\vp8l_dec.c" />
+    <ClCompile Include="third_party\libwebp\src\dec\webp_dec.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\alpha_processing.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\alpha_processing_sse2.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\cpu.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\dec.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\dec_clip_tables.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\dec_sse2.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\filters.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\filters_sse2.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\lossless.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\lossless_sse2.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\rescaler.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\rescaler_sse2.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\upsampling.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\upsampling_sse2.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\yuv.c" />
+    <ClCompile Include="third_party\libwebp\src\dsp\yuv_sse2.c" />
+    <ClCompile Include="third_party\libwebp\src\utils\bit_reader_utils.c" />
+    <ClCompile Include="third_party\libwebp\src\utils\color_cache_utils.c" />
+    <ClCompile Include="third_party\libwebp\src\utils\filters_utils.c" />
+    <ClCompile Include="third_party\libwebp\src\utils\huffman_utils.c" />
+    <ClCompile Include="third_party\libwebp\src\utils\palette.c" />
+    <ClCompile Include="third_party\libwebp\src\utils\quant_levels_dec_utils.c" />
+    <ClCompile Include="third_party\libwebp\src\utils\random_utils.c" />
+    <ClCompile Include="third_party\libwebp\src\utils\rescaler_utils.c" />
+    <ClCompile Include="third_party\libwebp\src\utils\thread_utils.c" />
+    <ClCompile Include="third_party\libwebp\src\utils\utils.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CPlusPlus_Common.h" />
+    <ClInclude Include="POP_CPlusPlusBase.h" />
+    <ClInclude Include="SogImporter.h" />
+    <ClInclude Include="third_party\miniz_repo\miniz.h" />
+    <ClInclude Include="third_party\miniz_repo\miniz_common.h" />
+    <ClInclude Include="third_party\miniz_repo\miniz_export.h" />
+    <ClInclude Include="third_party\miniz_repo\miniz_tdef.h" />
+    <ClInclude Include="third_party\miniz_repo\miniz_tinfl.h" />
+    <ClInclude Include="third_party\miniz_repo\miniz_zip.h" />
+    <ClInclude Include="third_party\nlohmann\json.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

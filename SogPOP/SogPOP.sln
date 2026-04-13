@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SogPOP", "SogPOP.vcxproj", "{D4B1D60F-7DF2-4D1D-9F72-4CF0CDB45B6F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D4B1D60F-7DF2-4D1D-9F72-4CF0CDB45B6F}.Debug|x64.ActiveCfg = Debug|x64
+		{D4B1D60F-7DF2-4D1D-9F72-4CF0CDB45B6F}.Debug|x64.Build.0 = Debug|x64
+		{D4B1D60F-7DF2-4D1D-9F72-4CF0CDB45B6F}.Release|x64.ActiveCfg = Release|x64
+		{D4B1D60F-7DF2-4D1D-9F72-4CF0CDB45B6F}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B8877E09-2609-44BD-B54C-59A4ED53A4F1}
+	EndGlobalSection
+EndGlobal

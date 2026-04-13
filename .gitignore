@@ -1,0 +1,58 @@
+*
+!.gitignore
+!README.md
+!SogPOP/
+!SogPOP/**
+!SogPreviewRenderer/
+!SogPreviewRenderer/**
+
+# Build outputs
+SogPOP/Debug/
+SogPOP/*.obj
+SogPOP/*.lib
+SogPOP/*.exp
+SogPOP/*.exe
+SogPOP/*.dll
+SogPOP/*.pdb
+SogPOP/*.ilk
+
+# Visual Studio local state
+SogPOP/.vs/
+SogPOP/*.suo
+SogPOP/*.user
+SogPOP/*.VC.db
+SogPOP/*.VC.opendb
+
+# Local diagnostics and scratch files
+SogPOP/diagnose_sh0.cpp
+SogPOP/diagnose_sh0.obj
+SogPOP/diagnose_sh0.exe
+SogPOP/build_diagnose_sh0.bat
+
+# Unused vendor copy
+SogPOP/third_party/miniz/
+
+# Keep only the libwebp files used by this project plus license files
+SogPOP/third_party/libwebp/*
+!SogPOP/third_party/libwebp/COPYING
+!SogPOP/third_party/libwebp/PATENTS
+!SogPOP/third_party/libwebp/src/
+!SogPOP/third_party/libwebp/src/**
+
+# Keep only the miniz_repo files used by this project plus license file
+SogPOP/third_party/miniz_repo/*
+!SogPOP/third_party/miniz_repo/LICENSE
+!SogPOP/third_party/miniz_repo/miniz.c
+!SogPOP/third_party/miniz_repo/miniz.h
+!SogPOP/third_party/miniz_repo/miniz_common.h
+!SogPOP/third_party/miniz_repo/miniz_export.h
+!SogPOP/third_party/miniz_repo/miniz_tdef.c
+!SogPOP/third_party/miniz_repo/miniz_tdef.h
+!SogPOP/third_party/miniz_repo/miniz_tinfl.c
+!SogPOP/third_party/miniz_repo/miniz_tinfl.h
+!SogPOP/third_party/miniz_repo/miniz_zip.c
+!SogPOP/third_party/miniz_repo/miniz_zip.h
+
+# Keep vendored source, but ignore nested git metadata if present
+SogPOP/third_party/**/.git/
+SogPOP/third_party/**/.github/
