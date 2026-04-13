@@ -6,6 +6,8 @@
 !SogPOP/**
 !SogPreviewRenderer/
 !SogPreviewRenderer/**
+!tools/
+!tools/**
 
 # Build outputs
 SogPOP/*.obj
