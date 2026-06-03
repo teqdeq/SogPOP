@@ -20,7 +20,21 @@ Recommended TouchDesigner setup:
    - `Output Primitive Type` = `Triangle Strip`
    - `Num Output Vertices` = `4`
    - if you do not see those three fields immediately, widen the parameter dialog or scroll farther down/right on the `Load` tab; they belong to the GLSL MAT itself, not to the shader code
-4. On the GLSL MAT `Attribute` tab add these custom attribute rows:
+4. On the GLSL MAT `Attribute` tab:
+   - always add:
+   - `Name` = `scale`
+   - `Type` = `float3`
+   - `Name` = `rot`
+   - `Type` = `float4`
+   - then add SH rows for your export level:
+   - `sh0`: add none of `sh1..sh15`
+   - `sh1`: add `sh1..sh3`
+   - `sh2`: add `sh1..sh8`
+   - `sh3`: add `sh1..sh15`
+   - full-capability setup (works for all exports) is to add `sh1..sh15` once and keep it.
+   - do not use the `Matrix Attribute` section for these
+
+   Full-capability `sh1..sh15` rows:
    - `Name` = `scale`
    - `Type` = `float3`
    - `Name` = `rot`
@@ -55,7 +69,6 @@ Recommended TouchDesigner setup:
    - `Type` = `float3`
    - `Name` = `sh15`
    - `Type` = `float3`
-   - do not use the `Matrix Attribute` section for these
 5. Press `Load Uniform Names`, then set these uniforms on the GLSL MAT:
    - `uScaleMul = 1.0`
    - `uSigmaExtent = 3.0`
@@ -93,18 +106,31 @@ Recommended control ranges:
 - `uAlphaGamma`: `0.6` to `1.8`
 - `uColorMul`: `0.5` to `2.0`
 - `uSoftClip`: `0.0` to `0.08`
-- `uShMix`: `0.0` (disable SH) to `1.0` (full SH2)
+- `uShMix`: `0.0` (disable SH) to `1.0` (full SH)
 - `uShIntensity`: `0.5` to `2.0`
 - `uShSaturation`: `0.0` to `1.5`
 - `uShClampMin`: `-1.0` to `0.2`
 - `uShClampMax`: `1.0` to `8.0`
 - `uShDegree`: `0.0` (sh0), `1.0` (sh1), `2.0` (sh2), `3.0` (sh3)
 
+Automation:
+- The importer now exposes these Info values:
+- `shTripletCount`
+- `shDegree`
+- You can auto-drive the GLSL MAT `uShDegree` from those values.
+- A ready script is included at `tools/touchdesigner_auto_sh_degree.py`.
+- Typical setup:
+- Create a DAT Execute DAT and monitor the SogPOP Info DAT table.
+- Paste the script into that DAT Execute DAT.
+- Update `INFO_DAT_PATH` and `GLSL_MAT_PATH` constants at the top of the script.
+- Keep GLSL MAT attributes on full-capability (`sh1..sh15`) to avoid dynamic remapping.
+
 Notes:
 - This preview uses the importer’s `Color` and `alpha` attributes directly.
 - It uses `scale` + `rot` to estimate anisotropic projected covariance and orient each splat ellipse.
 - It evaluates SH view-dependent color from `sh1` to `sh15` and mixes it with the base `Color`.
 - Set `uShDegree` to match your export level from SuperSplat: sh0/sh1/sh2/sh3.
+- Or use the automation script to set `uShDegree` automatically from the importer Info DAT.
 - If you want to compare against the old static look quickly, set `uShMix = 0.0`.
 - If the result looks too puffy, reduce `uScaleMul` or `uSigmaExtent`.
 - If the result looks too sparse, increase `uScaleMul`, `uAlphaMul`, or `uMaxWorldSize`.

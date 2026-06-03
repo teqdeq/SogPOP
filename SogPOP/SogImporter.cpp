@@ -568,6 +568,17 @@ inferHigherOrderTripletCount(size_t centroidPixelCount, const DecodedImage* shNL
 	return 0;
 }
 
+int32_t
+degreeFromHigherOrderTriplets(uint32_t higherOrderTripletCount)
+{
+	for (int32_t degree = 3; degree >= 0; --degree)
+	{
+		if (higherOrderTripletCount == higherOrderTripletCountFromDegree(degree))
+			return degree;
+	}
+	return 0;
+}
+
 float
 decodeCodebookValue(uint8_t sample, const std::vector<float>& codebook)
 {
@@ -733,7 +744,7 @@ int32_t
 SogImporter::getNumInfoCHOPChans(void* reserved)
 {
 	(void)reserved;
-	return 2;
+	return 4;
 }
 
 void
@@ -750,13 +761,23 @@ SogImporter::getInfoCHOPChan(int32_t index, OP_InfoCHOPChan* chan, void* reserve
 		chan->name->setString("pointCount");
 		chan->value = static_cast<float>(myCache.size());
 	}
+	else if (index == 2)
+	{
+		chan->name->setString("shTripletCount");
+		chan->value = static_cast<float>(myCache.shTripletCount);
+	}
+	else if (index == 3)
+	{
+		chan->name->setString("shDegree");
+		chan->value = static_cast<float>(degreeFromHigherOrderTriplets(myCache.shTripletCount));
+	}
 }
 
 bool
 SogImporter::getInfoDATSize(OP_InfoDATSize* infoSize, void* reserved)
 {
 	(void)reserved;
-	infoSize->rows = 4;
+	infoSize->rows = 6;
 	infoSize->cols = 2;
 	infoSize->byColumn = false;
 	return true;
@@ -779,10 +800,18 @@ SogImporter::getInfoDATEntries(int32_t index, int32_t nEntries, OP_InfoDATEntrie
 		setString(entries->values[1], std::to_string(myCache.size()));
 		break;
 	case 2:
+		setString(entries->values[0], "shTripletCount");
+		setString(entries->values[1], std::to_string(myCache.shTripletCount));
+		break;
+	case 3:
+		setString(entries->values[0], "shDegree");
+		setString(entries->values[1], std::to_string(degreeFromHigherOrderTriplets(myCache.shTripletCount)));
+		break;
+	case 4:
 		setString(entries->values[0], "warning");
 		setString(entries->values[1], myWarning);
 		break;
-	case 3:
+	case 5:
 		setString(entries->values[0], "error");
 		setString(entries->values[1], myError);
 		break;
