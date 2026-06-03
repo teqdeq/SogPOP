@@ -12,6 +12,13 @@ out VertexData
     vec3 sh6;
     vec3 sh7;
     vec3 sh8;
+    vec3 sh9;
+    vec3 sh10;
+    vec3 sh11;
+    vec3 sh12;
+    vec3 sh13;
+    vec3 sh14;
+    vec3 sh15;
     flat int cameraIndex;
 } vOut;
 
@@ -33,6 +40,13 @@ void main()
     vOut.sh6 = TDAttrib_sh6();
     vOut.sh7 = TDAttrib_sh7();
     vOut.sh8 = TDAttrib_sh8();
+    vOut.sh9 = TDAttrib_sh9();
+    vOut.sh10 = TDAttrib_sh10();
+    vOut.sh11 = TDAttrib_sh11();
+    vOut.sh12 = TDAttrib_sh12();
+    vOut.sh13 = TDAttrib_sh13();
+    vOut.sh14 = TDAttrib_sh14();
+    vOut.sh15 = TDAttrib_sh15();
     vOut.cameraIndex = TDCameraIndex();
 
     gl_Position = TDWorldToProj(worldPos);

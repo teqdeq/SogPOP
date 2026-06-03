@@ -1,7 +1,7 @@
 # SOG Preview Renderer
 
 This is a TouchDesigner preview renderer for the SogPOP importer.
-It supports anisotropic Gaussian splat orientation using per-point `scale` and `rot` attributes, and SH2 view-dependent color evaluation using `sh1` to `sh8` attributes.
+It supports anisotropic Gaussian splat orientation using per-point `scale` and `rot` attributes, and adaptive SH view-dependent color evaluation using `sh1` to `sh15` attributes.
 
 Files:
 - `sog_preview.vert`
@@ -41,6 +41,20 @@ Recommended TouchDesigner setup:
    - `Type` = `float3`
    - `Name` = `sh8`
    - `Type` = `float3`
+   - `Name` = `sh9`
+   - `Type` = `float3`
+   - `Name` = `sh10`
+   - `Type` = `float3`
+   - `Name` = `sh11`
+   - `Type` = `float3`
+   - `Name` = `sh12`
+   - `Type` = `float3`
+   - `Name` = `sh13`
+   - `Type` = `float3`
+   - `Name` = `sh14`
+   - `Type` = `float3`
+   - `Name` = `sh15`
+   - `Type` = `float3`
    - do not use the `Matrix Attribute` section for these
 5. Press `Load Uniform Names`, then set these uniforms on the GLSL MAT:
    - `uScaleMul = 1.0`
@@ -58,6 +72,7 @@ Recommended TouchDesigner setup:
    - `uShSaturation = 1.0`
    - `uShClampMin = 0.0`
    - `uShClampMax = 4.0`
+   - `uShDegree = 2.0`
 6. On the GLSL MAT `Common` page:
    - enable `Blending`
    - set source blend to `Source Alpha`
@@ -83,11 +98,13 @@ Recommended control ranges:
 - `uShSaturation`: `0.0` to `1.5`
 - `uShClampMin`: `-1.0` to `0.2`
 - `uShClampMax`: `1.0` to `8.0`
+- `uShDegree`: `0.0` (sh0), `1.0` (sh1), `2.0` (sh2), `3.0` (sh3)
 
 Notes:
 - This preview uses the importer’s `Color` and `alpha` attributes directly.
 - It uses `scale` + `rot` to estimate anisotropic projected covariance and orient each splat ellipse.
-- It evaluates SH2 view-dependent color from `sh1` to `sh8` and mixes it with the base `Color`.
+- It evaluates SH view-dependent color from `sh1` to `sh15` and mixes it with the base `Color`.
+- Set `uShDegree` to match your export level from SuperSplat: sh0/sh1/sh2/sh3.
 - If you want to compare against the old static look quickly, set `uShMix = 0.0`.
 - If the result looks too puffy, reduce `uScaleMul` or `uSigmaExtent`.
 - If the result looks too sparse, increase `uScaleMul`, `uAlphaMul`, or `uMaxWorldSize`.
@@ -101,4 +118,4 @@ What this solves:
 
 What it does not solve yet:
 - exact SuperSplat visual parity
-- full higher-order SH workflows beyond SH2
+- full higher-order SH workflows beyond SH3

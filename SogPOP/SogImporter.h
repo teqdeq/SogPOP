@@ -38,6 +38,7 @@ private:
 		std::vector<float> alphas;
 		std::vector<Vector> normals;
 		std::vector<float> shCoefficients;
+		uint32_t shTripletCount = 0;
 
 		void clear();
 		[[nodiscard]] bool empty() const;

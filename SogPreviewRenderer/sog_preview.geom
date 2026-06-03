@@ -21,6 +21,13 @@ in VertexData
     vec3 sh6;
     vec3 sh7;
     vec3 sh8;
+    vec3 sh9;
+    vec3 sh10;
+    vec3 sh11;
+    vec3 sh12;
+    vec3 sh13;
+    vec3 sh14;
+    vec3 sh15;
     flat int cameraIndex;
 } gIn[];
 
@@ -37,6 +44,13 @@ out GeoData
     flat vec3 sh6;
     flat vec3 sh7;
     flat vec3 sh8;
+    flat vec3 sh9;
+    flat vec3 sh10;
+    flat vec3 sh11;
+    flat vec3 sh12;
+    flat vec3 sh13;
+    flat vec3 sh14;
+    flat vec3 sh15;
     flat int cameraIndex;
 } gOut;
 
@@ -109,6 +123,13 @@ void emitCorner(
     vec3 sh6,
     vec3 sh7,
     vec3 sh8,
+    vec3 sh9,
+    vec3 sh10,
+    vec3 sh11,
+    vec3 sh12,
+    vec3 sh13,
+    vec3 sh14,
+    vec3 sh15,
     int cameraIndex)
 {
     vec3 worldPos = center + rightAxis * (corner.x * halfSize.x) + upAxis * (corner.y * halfSize.y);
@@ -123,6 +144,13 @@ void emitCorner(
     gOut.sh6 = sh6;
     gOut.sh7 = sh7;
     gOut.sh8 = sh8;
+    gOut.sh9 = sh9;
+    gOut.sh10 = sh10;
+    gOut.sh11 = sh11;
+    gOut.sh12 = sh12;
+    gOut.sh13 = sh13;
+    gOut.sh14 = sh14;
+    gOut.sh15 = sh15;
     gOut.cameraIndex = cameraIndex;
     gl_Position = TDWorldToProj(worldPos, cameraIndex);
     EmitVertex();
@@ -140,6 +168,13 @@ void main()
     vec3 sh6 = gIn[0].sh6;
     vec3 sh7 = gIn[0].sh7;
     vec3 sh8 = gIn[0].sh8;
+    vec3 sh9 = gIn[0].sh9;
+    vec3 sh10 = gIn[0].sh10;
+    vec3 sh11 = gIn[0].sh11;
+    vec3 sh12 = gIn[0].sh12;
+    vec3 sh13 = gIn[0].sh13;
+    vec3 sh14 = gIn[0].sh14;
+    vec3 sh15 = gIn[0].sh15;
     int cameraIndex = gIn[0].cameraIndex;
     vec3 scale3 = max(gIn[0].scale * uScaleMul, vec3(1.0e-7));
 
@@ -183,9 +218,9 @@ void main()
     float minorHalf = clamp(uSigmaExtent * sqrt(valMinor), uMinWorldSize, uMaxWorldSize);
     vec2 halfSize = vec2(majorHalf, minorHalf);
 
-    emitCorner(vec2(-1.0, -1.0), center, majorWorld, minorWorld, halfSize, color, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, cameraIndex);
-    emitCorner(vec2( 1.0, -1.0), center, majorWorld, minorWorld, halfSize, color, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, cameraIndex);
-    emitCorner(vec2(-1.0,  1.0), center, majorWorld, minorWorld, halfSize, color, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, cameraIndex);
-    emitCorner(vec2( 1.0,  1.0), center, majorWorld, minorWorld, halfSize, color, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, cameraIndex);
+    emitCorner(vec2(-1.0, -1.0), center, majorWorld, minorWorld, halfSize, color, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, sh9, sh10, sh11, sh12, sh13, sh14, sh15, cameraIndex);
+    emitCorner(vec2( 1.0, -1.0), center, majorWorld, minorWorld, halfSize, color, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, sh9, sh10, sh11, sh12, sh13, sh14, sh15, cameraIndex);
+    emitCorner(vec2(-1.0,  1.0), center, majorWorld, minorWorld, halfSize, color, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, sh9, sh10, sh11, sh12, sh13, sh14, sh15, cameraIndex);
+    emitCorner(vec2( 1.0,  1.0), center, majorWorld, minorWorld, halfSize, color, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, sh9, sh10, sh11, sh12, sh13, sh14, sh15, cameraIndex);
     EndPrimitive();
 }

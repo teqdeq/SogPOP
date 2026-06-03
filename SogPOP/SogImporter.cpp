@@ -25,9 +25,9 @@ constexpr const char* kFileParName = "File";
 constexpr const char* kReloadParName = "Reload";
 constexpr const char* kPageName = "SOG";
 constexpr float kSh0Constant = 0.28209479177387814f;
-constexpr uint32_t kHigherOrderShTripletCount = 8;
+constexpr uint32_t kMaxHigherOrderShTripletCount = 15;
 constexpr uint32_t kColorQualifierEnumValue = 3;
-const std::array<const char*, 8> kHigherOrderShNames = { "sh1", "sh2", "sh3", "sh4", "sh5", "sh6", "sh7", "sh8" };
+const std::array<const char*, 15> kHigherOrderShNames = { "sh1", "sh2", "sh3", "sh4", "sh5", "sh6", "sh7", "sh8", "sh9", "sh10", "sh11", "sh12", "sh13", "sh14", "sh15" };
 
 const std::array<std::string, 6> kMeanAliases = { "means", "mean", "positions", "position", "pos", "p" };
 const std::array<std::string, 4> kScaleAliases = { "scales", "scale", "sizes", "size" };
@@ -503,6 +503,71 @@ tryGetCodebook(const json& node, std::vector<float>& codebook)
 	return parseFloatArray(*codebookNode, 1, codebook);
 }
 
+uint32_t
+higherOrderTripletCountFromDegree(int32_t degree)
+{
+	if (degree <= 0)
+		return 0;
+
+	if (degree > 3)
+		degree = 3;
+
+	const int32_t basisCount = (degree + 1) * (degree + 1);
+	return static_cast<uint32_t>(basisCount - 1);
+}
+
+std::optional<int32_t>
+tryGetIntValueNormalized(const json& node, const std::array<std::string, 5>& keys)
+{
+	for (const std::string& key : keys)
+	{
+		const json* valueNode = findObjectValueNormalized(node, normalizeKey(key));
+		if (!valueNode)
+			continue;
+
+		if (valueNode->is_number_integer())
+			return valueNode->get<int32_t>();
+
+		if (valueNode->is_number_unsigned())
+			return static_cast<int32_t>(valueNode->get<uint32_t>());
+	}
+
+	return std::nullopt;
+}
+
+uint32_t
+inferHigherOrderTripletCount(size_t centroidPixelCount, const DecodedImage* shNLabels, uint32_t pointCount)
+{
+	if (!shNLabels || pointCount == 0)
+		return 0;
+
+	const size_t labelTexels = static_cast<size_t>(shNLabels->width) * static_cast<size_t>(shNLabels->height);
+	const size_t sampleCount = std::min<size_t>(labelTexels, pointCount);
+	uint32_t maxLabel = 0;
+	for (size_t index = 0; index < sampleCount; ++index)
+	{
+		const size_t rgbaIndex = index * 4U;
+		const uint16_t value = static_cast<uint16_t>(shNLabels->rgba[rgbaIndex + 0]) |
+			(static_cast<uint16_t>(shNLabels->rgba[rgbaIndex + 1]) << 8);
+		maxLabel = std::max<uint32_t>(maxLabel, value);
+	}
+
+	for (uint32_t candidate : { 15U, 8U, 3U })
+	{
+		if ((centroidPixelCount % candidate) != 0)
+			continue;
+
+		const size_t centroidCount = centroidPixelCount / candidate;
+		if (centroidCount == 0)
+			continue;
+
+		if (static_cast<size_t>(maxLabel) < centroidCount)
+			return candidate;
+	}
+
+	return 0;
+}
+
 float
 decodeCodebookValue(uint8_t sample, const std::vector<float>& codebook)
 {
@@ -599,6 +664,7 @@ SogImporter::PointCache::clear()
 	alphas.clear();
 	normals.clear();
 	shCoefficients.clear();
+	shTripletCount = 0;
 }
 
 bool
@@ -888,33 +954,43 @@ SogImporter::buildPointCache(const std::string& filePath, PointCache& nextCache,
 		nextCache.alphas.resize(pointCount, 1.0f);
 		nextCache.normals.resize(pointCount, Vector(0.0f, 0.0f, 1.0f));
 		nextCache.shCoefficients.clear();
+		nextCache.shTripletCount = 0;
 
 		std::vector<float> shNCentroidValues;
 		if (hasSupersplatShN)
 		{
 			const size_t centroidPixelCount = static_cast<size_t>(shNCentroids->width) * static_cast<size_t>(shNCentroids->height);
-			if ((centroidPixelCount % kHigherOrderShTripletCount) != 0)
+			uint32_t higherOrderTripletCount = 0;
+
+			if (const auto degree = tryGetIntValueNormalized(*shNMeta, { "degree", "sh_degree", "max_degree", "order", "bands" }))
+				higherOrderTripletCount = higherOrderTripletCountFromDegree(*degree);
+			if (higherOrderTripletCount == 0)
+				higherOrderTripletCount = inferHigherOrderTripletCount(centroidPixelCount, shNLabels, pointCount);
+
+			if (higherOrderTripletCount == 0 || higherOrderTripletCount > kMaxHigherOrderShTripletCount || (centroidPixelCount % higherOrderTripletCount) != 0)
 			{
-				archive.warnings.push_back("shN centroid texture has an unexpected layout; skipping higher-order SH decode.");
+				archive.warnings.push_back("shN centroid texture has an unsupported layout; skipping higher-order SH decode.");
 				shNCentroids = nullptr;
 				shNLabels = nullptr;
 			}
 			else
 			{
-				const size_t centroidCount = centroidPixelCount / kHigherOrderShTripletCount;
-				shNCentroidValues.resize(centroidCount * kHigherOrderShTripletCount * 3U, 0.0f);
+				nextCache.shTripletCount = higherOrderTripletCount;
+				const size_t centroidCount = centroidPixelCount / higherOrderTripletCount;
+				shNCentroidValues.resize(centroidCount * higherOrderTripletCount * 3U, 0.0f);
 				for (size_t centroidIndex = 0; centroidIndex < centroidCount; ++centroidIndex)
 				{
-					for (uint32_t tripletIndex = 0; tripletIndex < kHigherOrderShTripletCount; ++tripletIndex)
+					for (uint32_t tripletIndex = 0; tripletIndex < higherOrderTripletCount; ++tripletIndex)
 					{
-						const size_t pixelIndex = (centroidIndex * kHigherOrderShTripletCount + tripletIndex) * 4U;
-						const size_t coeffIndex = (centroidIndex * kHigherOrderShTripletCount + tripletIndex) * 3U;
+						const size_t pixelIndex = (centroidIndex * higherOrderTripletCount + tripletIndex) * 4U;
+						const size_t coeffIndex = (centroidIndex * higherOrderTripletCount + tripletIndex) * 3U;
 						shNCentroidValues[coeffIndex + 0] = decodeCodebookValue(shNCentroids->rgba[pixelIndex + 0], shNCodebook);
 						shNCentroidValues[coeffIndex + 1] = decodeCodebookValue(shNCentroids->rgba[pixelIndex + 1], shNCodebook);
 						shNCentroidValues[coeffIndex + 2] = decodeCodebookValue(shNCentroids->rgba[pixelIndex + 2], shNCodebook);
 					}
 				}
-				nextCache.shCoefficients.resize(static_cast<size_t>(pointCount) * kHigherOrderShTripletCount * 3U, 0.0f);
+				nextCache.shCoefficients.resize(static_cast<size_t>(pointCount) * higherOrderTripletCount * 3U, 0.0f);
+				archive.warnings.push_back(std::string("Detected higher-order SH degree ") + std::to_string(static_cast<int32_t>(std::sqrt(static_cast<double>(higherOrderTripletCount + 1U))) - 1));
 			}
 		}
 
@@ -948,11 +1024,11 @@ SogImporter::buildPointCache(const std::string& filePath, PointCache& nextCache,
 			if (!nextCache.shCoefficients.empty() && shNLabels)
 			{
 				const uint16_t centroidIndex = decodeUint16LittleEndian(shNLabels->rgba[rgbaIndex + 0], shNLabels->rgba[rgbaIndex + 1]);
-				const size_t centroidBase = static_cast<size_t>(centroidIndex) * kHigherOrderShTripletCount * 3U;
-				const size_t pointBase = static_cast<size_t>(pointIndex) * kHigherOrderShTripletCount * 3U;
-				if (centroidBase + kHigherOrderShTripletCount * 3U <= shNCentroidValues.size())
+				const size_t centroidBase = static_cast<size_t>(centroidIndex) * nextCache.shTripletCount * 3U;
+				const size_t pointBase = static_cast<size_t>(pointIndex) * nextCache.shTripletCount * 3U;
+				if (centroidBase + static_cast<size_t>(nextCache.shTripletCount) * 3U <= shNCentroidValues.size())
 				{
-					std::copy_n(shNCentroidValues.data() + centroidBase, kHigherOrderShTripletCount * 3U, nextCache.shCoefficients.data() + pointBase);
+					std::copy_n(shNCentroidValues.data() + centroidBase, static_cast<size_t>(nextCache.shTripletCount) * 3U, nextCache.shCoefficients.data() + pointBase);
 				}
 			}
 
@@ -1084,9 +1160,10 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 	POP_SetBufferInfo sinfo;
 	std::vector<Color> colorRgba(cache.size());
 	std::vector<float> shArray(cache.size() * 15U * 3U, 0.0f);
-	std::array<std::vector<float>, kHigherOrderShTripletCount> shTriplets;
+	std::array<std::vector<float>, kMaxHigherOrderShTripletCount> shTriplets;
 	for (auto& triplet : shTriplets)
 		triplet.resize(static_cast<size_t>(cache.size()) * 3U, 0.0f);
+	const uint32_t shTripletCount = std::min<uint32_t>(cache.shTripletCount, kMaxHigherOrderShTripletCount);
 	for (uint32_t pointIndex = 0; pointIndex < cache.size(); ++pointIndex)
 	{
 		const size_t colorIndex = static_cast<size_t>(pointIndex) * 3U;
@@ -1098,12 +1175,12 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 
 		if (!cache.shCoefficients.empty())
 		{
-			const size_t sourceBase = static_cast<size_t>(pointIndex) * kHigherOrderShTripletCount * 3U;
+			const size_t sourceBase = static_cast<size_t>(pointIndex) * shTripletCount * 3U;
 			const size_t destBase = static_cast<size_t>(pointIndex) * 15U * 3U;
-			const size_t copyCount = std::min<size_t>(kHigherOrderShTripletCount * 3U, cache.shCoefficients.size() - sourceBase);
+			const size_t copyCount = std::min<size_t>(static_cast<size_t>(shTripletCount) * 3U, cache.shCoefficients.size() - sourceBase);
 			std::copy_n(cache.shCoefficients.data() + sourceBase, copyCount, shArray.data() + destBase);
 
-			for (uint32_t shIndex = 0; shIndex < kHigherOrderShTripletCount; ++shIndex)
+			for (uint32_t shIndex = 0; shIndex < shTripletCount; ++shIndex)
 			{
 				const size_t src = sourceBase + static_cast<size_t>(shIndex) * 3U;
 				if (src + 2U >= cache.shCoefficients.size())
@@ -1124,8 +1201,8 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 	OP_SmartRef<POP_Buffer> rotBuffer = copyBuffer(myContext, cache.quaternions.data(), cache.size() * 4U);
 	OP_SmartRef<POP_Buffer> colorBuffer = copyBuffer(myContext, colorRgba.data(), cache.size());
 	OP_SmartRef<POP_Buffer> shBuffer = copyBuffer(myContext, shArray.data(), static_cast<uint32_t>(shArray.size()));
-	std::array<OP_SmartRef<POP_Buffer>, kHigherOrderShTripletCount> shTripletBuffers;
-	for (uint32_t shIndex = 0; shIndex < kHigherOrderShTripletCount; ++shIndex)
+	std::array<OP_SmartRef<POP_Buffer>, kMaxHigherOrderShTripletCount> shTripletBuffers;
+	for (uint32_t shIndex = 0; shIndex < kMaxHigherOrderShTripletCount; ++shIndex)
 	{
 		shTripletBuffers[shIndex] = copyBuffer(myContext, shTriplets[shIndex].data(), static_cast<uint32_t>(cache.size()));
 	}
@@ -1176,7 +1253,7 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 	shInfo.attribClass = POP_AttributeClass::Point;
 	output->setAttribute(&shBuffer, shInfo, sinfo, nullptr);
 
-	for (uint32_t shIndex = 0; shIndex < kHigherOrderShTripletCount; ++shIndex)
+	for (uint32_t shIndex = 0; shIndex < kMaxHigherOrderShTripletCount; ++shIndex)
 	{
 		POP_AttributeInfo shTripletInfo;
 		shTripletInfo.name = kHigherOrderShNames[shIndex];
