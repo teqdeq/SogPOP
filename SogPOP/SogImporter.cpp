@@ -26,6 +26,7 @@ constexpr const char* kReloadParName = "Reload";
 constexpr const char* kPageName = "SOG";
 constexpr float kSh0Constant = 0.28209479177387814f;
 constexpr uint32_t kHigherOrderShTripletCount = 8;
+constexpr uint32_t kColorQualifierEnumValue = 3;
 const std::array<const char*, 8> kHigherOrderShNames = { "sh1", "sh2", "sh3", "sh4", "sh5", "sh6", "sh7", "sh8" };
 
 const std::array<std::string, 6> kMeanAliases = { "means", "mean", "positions", "position", "pos", "p" };
@@ -1102,7 +1103,9 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 	}
 
 	OP_SmartRef<POP_Buffer> positionBuffer = copyBuffer(myContext, cache.positions.data(), cache.size());
+	OP_SmartRef<POP_Buffer> initPosBuffer = copyBuffer(myContext, cache.positions.data(), cache.size());
 	OP_SmartRef<POP_Buffer> scaleBuffer = copyBuffer(myContext, cache.scales.data(), cache.size());
+	OP_SmartRef<POP_Buffer> initScaleBuffer = copyBuffer(myContext, cache.scales.data(), cache.size());
 	OP_SmartRef<POP_Buffer> rotBuffer = copyBuffer(myContext, cache.quaternions.data(), cache.size() * 4U);
 	OP_SmartRef<POP_Buffer> colorBuffer = copyBuffer(myContext, colorRgba.data(), cache.size());
 	OP_SmartRef<POP_Buffer> shBuffer = copyBuffer(myContext, shArray.data(), static_cast<uint32_t>(shArray.size()));
@@ -1115,19 +1118,28 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 	posInfo.attribClass = POP_AttributeClass::Point;
 	output->setAttribute(&positionBuffer, posInfo, sinfo, nullptr);
 
-	POP_AttributeInfo scaleInfo;
-	scaleInfo.name = "scale";
-	scaleInfo.numComponents = 3;
-	scaleInfo.type = POP_AttributeType::Float;
-	scaleInfo.attribClass = POP_AttributeClass::Point;
-	output->setAttribute(&scaleBuffer, scaleInfo, sinfo, nullptr);
-
 	POP_AttributeInfo colorInfo;
 	colorInfo.name = "Color";
 	colorInfo.numComponents = 4;
 	colorInfo.type = POP_AttributeType::Float;
+	// TouchDesigner validates reserved attributes by qualifier, not only by name/type.
+	colorInfo.qualifier = static_cast<POP_AttributeQualifier>(kColorQualifierEnumValue);
 	colorInfo.attribClass = POP_AttributeClass::Point;
 	output->setAttribute(&colorBuffer, colorInfo, sinfo, nullptr);
+
+	POP_AttributeInfo initPosInfo;
+	initPosInfo.name = "InitPos";
+	initPosInfo.numComponents = 3;
+	initPosInfo.type = POP_AttributeType::Float;
+	initPosInfo.attribClass = POP_AttributeClass::Point;
+	output->setAttribute(&initPosBuffer, initPosInfo, sinfo, nullptr);
+
+	POP_AttributeInfo initScaleInfo;
+	initScaleInfo.name = "InitScale";
+	initScaleInfo.numComponents = 3;
+	initScaleInfo.type = POP_AttributeType::Float;
+	initScaleInfo.attribClass = POP_AttributeClass::Point;
+	output->setAttribute(&initScaleBuffer, initScaleInfo, sinfo, nullptr);
 
 	POP_AttributeInfo rotInfo;
 	rotInfo.name = "rot";
