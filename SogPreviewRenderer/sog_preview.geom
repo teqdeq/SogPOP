@@ -13,6 +13,14 @@ in VertexData
     vec4 color;
     vec3 scale;
     vec4 rot;
+    vec3 sh1;
+    vec3 sh2;
+    vec3 sh3;
+    vec3 sh4;
+    vec3 sh5;
+    vec3 sh6;
+    vec3 sh7;
+    vec3 sh8;
     flat int cameraIndex;
 } gIn[];
 
@@ -21,6 +29,14 @@ out GeoData
     vec4 color;
     vec2 localCoord;
     vec3 worldPos;
+    flat vec3 sh1;
+    flat vec3 sh2;
+    flat vec3 sh3;
+    flat vec3 sh4;
+    flat vec3 sh5;
+    flat vec3 sh6;
+    flat vec3 sh7;
+    flat vec3 sh8;
     flat int cameraIndex;
 } gOut;
 
@@ -78,12 +94,35 @@ void solveSymmetricEigen(vec2 c0, vec2 c1, out vec2 dirMajor, out vec2 dirMinor,
     dirMinor = vec2(-dirMajor.y, dirMajor.x);
 }
 
-void emitCorner(vec2 corner, vec3 center, vec3 rightAxis, vec3 upAxis, vec2 halfSize, vec4 color, int cameraIndex)
+void emitCorner(
+    vec2 corner,
+    vec3 center,
+    vec3 rightAxis,
+    vec3 upAxis,
+    vec2 halfSize,
+    vec4 color,
+    vec3 sh1,
+    vec3 sh2,
+    vec3 sh3,
+    vec3 sh4,
+    vec3 sh5,
+    vec3 sh6,
+    vec3 sh7,
+    vec3 sh8,
+    int cameraIndex)
 {
     vec3 worldPos = center + rightAxis * (corner.x * halfSize.x) + upAxis * (corner.y * halfSize.y);
     gOut.color = color;
     gOut.localCoord = corner;
     gOut.worldPos = worldPos;
+    gOut.sh1 = sh1;
+    gOut.sh2 = sh2;
+    gOut.sh3 = sh3;
+    gOut.sh4 = sh4;
+    gOut.sh5 = sh5;
+    gOut.sh6 = sh6;
+    gOut.sh7 = sh7;
+    gOut.sh8 = sh8;
     gOut.cameraIndex = cameraIndex;
     gl_Position = TDWorldToProj(worldPos, cameraIndex);
     EmitVertex();
@@ -93,6 +132,14 @@ void main()
 {
     vec3 center = gIn[0].worldPos;
     vec4 color = gIn[0].color;
+    vec3 sh1 = gIn[0].sh1;
+    vec3 sh2 = gIn[0].sh2;
+    vec3 sh3 = gIn[0].sh3;
+    vec3 sh4 = gIn[0].sh4;
+    vec3 sh5 = gIn[0].sh5;
+    vec3 sh6 = gIn[0].sh6;
+    vec3 sh7 = gIn[0].sh7;
+    vec3 sh8 = gIn[0].sh8;
     int cameraIndex = gIn[0].cameraIndex;
     vec3 scale3 = max(gIn[0].scale * uScaleMul, vec3(1.0e-7));
 
@@ -136,9 +183,9 @@ void main()
     float minorHalf = clamp(uSigmaExtent * sqrt(valMinor), uMinWorldSize, uMaxWorldSize);
     vec2 halfSize = vec2(majorHalf, minorHalf);
 
-    emitCorner(vec2(-1.0, -1.0), center, majorWorld, minorWorld, halfSize, color, cameraIndex);
-    emitCorner(vec2( 1.0, -1.0), center, majorWorld, minorWorld, halfSize, color, cameraIndex);
-    emitCorner(vec2(-1.0,  1.0), center, majorWorld, minorWorld, halfSize, color, cameraIndex);
-    emitCorner(vec2( 1.0,  1.0), center, majorWorld, minorWorld, halfSize, color, cameraIndex);
+    emitCorner(vec2(-1.0, -1.0), center, majorWorld, minorWorld, halfSize, color, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, cameraIndex);
+    emitCorner(vec2( 1.0, -1.0), center, majorWorld, minorWorld, halfSize, color, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, cameraIndex);
+    emitCorner(vec2(-1.0,  1.0), center, majorWorld, minorWorld, halfSize, color, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, cameraIndex);
+    emitCorner(vec2( 1.0,  1.0), center, majorWorld, minorWorld, halfSize, color, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, cameraIndex);
     EndPrimitive();
 }

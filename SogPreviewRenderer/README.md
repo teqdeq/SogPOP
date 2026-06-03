@@ -1,7 +1,7 @@
 # SOG Preview Renderer
 
 This is a TouchDesigner preview renderer for the SogPOP importer.
-It now supports anisotropic Gaussian splat orientation using per-point `scale` and `rot` attributes, so it looks much closer to a true Gaussian splat render than simple point sprites.
+It supports anisotropic Gaussian splat orientation using per-point `scale` and `rot` attributes, and SH2 view-dependent color evaluation using `sh1` to `sh8` attributes.
 
 Files:
 - `sog_preview.vert`
@@ -25,6 +25,22 @@ Recommended TouchDesigner setup:
    - `Type` = `float3`
    - `Name` = `rot`
    - `Type` = `float4`
+   - `Name` = `sh1`
+   - `Type` = `float3`
+   - `Name` = `sh2`
+   - `Type` = `float3`
+   - `Name` = `sh3`
+   - `Type` = `float3`
+   - `Name` = `sh4`
+   - `Type` = `float3`
+   - `Name` = `sh5`
+   - `Type` = `float3`
+   - `Name` = `sh6`
+   - `Type` = `float3`
+   - `Name` = `sh7`
+   - `Type` = `float3`
+   - `Name` = `sh8`
+   - `Type` = `float3`
    - do not use the `Matrix Attribute` section for these
 5. Press `Load Uniform Names`, then set these uniforms on the GLSL MAT:
    - `uScaleMul = 1.0`
@@ -37,6 +53,11 @@ Recommended TouchDesigner setup:
    - `uAlphaGamma = 1.0`
    - `uColorMul = 1.0`
    - `uSoftClip = 0.01`
+   - `uShMix = 1.0`
+   - `uShIntensity = 1.0`
+   - `uShSaturation = 1.0`
+   - `uShClampMin = 0.0`
+   - `uShClampMax = 4.0`
 6. On the GLSL MAT `Common` page:
    - enable `Blending`
    - set source blend to `Source Alpha`
@@ -57,11 +78,17 @@ Recommended control ranges:
 - `uAlphaGamma`: `0.6` to `1.8`
 - `uColorMul`: `0.5` to `2.0`
 - `uSoftClip`: `0.0` to `0.08`
+- `uShMix`: `0.0` (disable SH) to `1.0` (full SH2)
+- `uShIntensity`: `0.5` to `2.0`
+- `uShSaturation`: `0.0` to `1.5`
+- `uShClampMin`: `-1.0` to `0.2`
+- `uShClampMax`: `1.0` to `8.0`
 
 Notes:
 - This preview uses the importer’s `Color` and `alpha` attributes directly.
 - It uses `scale` + `rot` to estimate anisotropic projected covariance and orient each splat ellipse.
-- It does not yet evaluate the `sh1` to `sh8` coefficients for view-dependent shading.
+- It evaluates SH2 view-dependent color from `sh1` to `sh8` and mixes it with the base `Color`.
+- If you want to compare against the old static look quickly, set `uShMix = 0.0`.
 - If the result looks too puffy, reduce `uScaleMul` or `uSigmaExtent`.
 - If the result looks too sparse, increase `uScaleMul`, `uAlphaMul`, or `uMaxWorldSize`.
 - If overlapping transparency looks noisy, try enabling order independent transparency in the `Render TOP`.
@@ -70,7 +97,8 @@ What this solves:
 - point-cloud look in the POP viewer
 - tiny 1-pixel points that hide shape continuity
 - isotropic billboard look that ignores splat orientation
+- no view-dependent color from SH2 data
 
 What it does not solve yet:
 - exact SuperSplat visual parity
-- SH-based view-dependent lighting
+- full higher-order SH workflows beyond SH2

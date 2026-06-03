@@ -1084,6 +1084,9 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 	POP_SetBufferInfo sinfo;
 	std::vector<Color> colorRgba(cache.size());
 	std::vector<float> shArray(cache.size() * 15U * 3U, 0.0f);
+	std::array<std::vector<float>, kHigherOrderShTripletCount> shTriplets;
+	for (auto& triplet : shTriplets)
+		triplet.resize(static_cast<size_t>(cache.size()) * 3U, 0.0f);
 	for (uint32_t pointIndex = 0; pointIndex < cache.size(); ++pointIndex)
 	{
 		const size_t colorIndex = static_cast<size_t>(pointIndex) * 3U;
@@ -1099,6 +1102,18 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 			const size_t destBase = static_cast<size_t>(pointIndex) * 15U * 3U;
 			const size_t copyCount = std::min<size_t>(kHigherOrderShTripletCount * 3U, cache.shCoefficients.size() - sourceBase);
 			std::copy_n(cache.shCoefficients.data() + sourceBase, copyCount, shArray.data() + destBase);
+
+			for (uint32_t shIndex = 0; shIndex < kHigherOrderShTripletCount; ++shIndex)
+			{
+				const size_t src = sourceBase + static_cast<size_t>(shIndex) * 3U;
+				if (src + 2U >= cache.shCoefficients.size())
+					break;
+
+				const size_t dst = static_cast<size_t>(pointIndex) * 3U;
+				shTriplets[shIndex][dst + 0U] = cache.shCoefficients[src + 0U];
+				shTriplets[shIndex][dst + 1U] = cache.shCoefficients[src + 1U];
+				shTriplets[shIndex][dst + 2U] = cache.shCoefficients[src + 2U];
+			}
 		}
 	}
 
@@ -1109,6 +1124,11 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 	OP_SmartRef<POP_Buffer> rotBuffer = copyBuffer(myContext, cache.quaternions.data(), cache.size() * 4U);
 	OP_SmartRef<POP_Buffer> colorBuffer = copyBuffer(myContext, colorRgba.data(), cache.size());
 	OP_SmartRef<POP_Buffer> shBuffer = copyBuffer(myContext, shArray.data(), static_cast<uint32_t>(shArray.size()));
+	std::array<OP_SmartRef<POP_Buffer>, kHigherOrderShTripletCount> shTripletBuffers;
+	for (uint32_t shIndex = 0; shIndex < kHigherOrderShTripletCount; ++shIndex)
+	{
+		shTripletBuffers[shIndex] = copyBuffer(myContext, shTriplets[shIndex].data(), static_cast<uint32_t>(cache.size()));
+	}
 	OP_SmartRef<POP_Buffer> indexBuffer = createPointIndexBuffer(cache.size());
 
 	POP_AttributeInfo posInfo;
@@ -1155,6 +1175,16 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 	shInfo.type = POP_AttributeType::Float;
 	shInfo.attribClass = POP_AttributeClass::Point;
 	output->setAttribute(&shBuffer, shInfo, sinfo, nullptr);
+
+	for (uint32_t shIndex = 0; shIndex < kHigherOrderShTripletCount; ++shIndex)
+	{
+		POP_AttributeInfo shTripletInfo;
+		shTripletInfo.name = kHigherOrderShNames[shIndex];
+		shTripletInfo.numComponents = 3;
+		shTripletInfo.type = POP_AttributeType::Float;
+		shTripletInfo.attribClass = POP_AttributeClass::Point;
+		output->setAttribute(&shTripletBuffers[shIndex], shTripletInfo, sinfo, nullptr);
+	}
 
 	POP_IndexBufferInfo indexInfo;
 	indexInfo.type = POP_IndexType::UInt32;
