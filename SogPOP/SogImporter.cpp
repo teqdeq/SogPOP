@@ -1233,7 +1233,7 @@ SogImporter::publishCache(POP_Output* output, const PointCache& cache)
 	std::array<OP_SmartRef<POP_Buffer>, kMaxHigherOrderShTripletCount> shTripletBuffers;
 	for (uint32_t shIndex = 0; shIndex < kMaxHigherOrderShTripletCount; ++shIndex)
 	{
-		shTripletBuffers[shIndex] = copyBuffer(myContext, shTriplets[shIndex].data(), static_cast<uint32_t>(cache.size()));
+		shTripletBuffers[shIndex] = copyBuffer(myContext, shTriplets[shIndex].data(), static_cast<uint32_t>(shTriplets[shIndex].size()));
 	}
 	OP_SmartRef<POP_Buffer> indexBuffer = createPointIndexBuffer(cache.size());
 
