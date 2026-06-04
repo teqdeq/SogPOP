@@ -15,7 +15,7 @@ if errorlevel 1 exit /b %errorlevel%
 if not exist Debug mkdir Debug
 
 set OUTPUT_NAME=%~1
-if "%OUTPUT_NAME%"=="" set OUTPUT_NAME=SogPOP_test.dll
+if "%OUTPUT_NAME%"=="" set OUTPUT_NAME=SogPOP_new.dll
 
 cl /nologo /std:c++17 /EHsc /LD ^
 	/I. ^

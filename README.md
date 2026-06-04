@@ -3,7 +3,7 @@
 TouchDesigner `.sog` importer and preview renderer for SuperSplat-style exports.
 
 Quick start:
-- Recommended DLL: [SogPOP/Debug/SogPOP.dll](SogPOP/Debug/SogPOP.dll)
+- Recommended DLL: [SogPOP/Debug/SogPOP_new.dll](SogPOP/Debug/SogPOP_new.dll)
 - Sample file: [cluster fly XL.sog](cluster%20fly%20XL.sog)
 - Importer setup: [SogPOP/README.md](SogPOP/README.md)
 - Preview renderer setup: [SogPreviewRenderer/README.md](SogPreviewRenderer/README.md)
@@ -11,7 +11,7 @@ Quick start:
 Compatibility note:
 - The included DLL is built for 64-bit TouchDesigner 2025.32460. If another machine reports `failed to load plugin`, first verify it is running a compatible 64-bit TouchDesigner 2025 build.
 - If TouchDesigner only shows a generic load failure, run this on that machine to get the real Windows loader error:
-- `powershell -ExecutionPolicy Bypass -File .\tools\check_plugin_load.ps1 .\SogPOP\Debug\SogPOP.dll`
+- `powershell -ExecutionPolicy Bypass -File .\tools\check_plugin_load.ps1 .\SogPOP\Debug\SogPOP_new.dll`
 - The current build imports `CreateFile2` and `GetSystemTimePreciseAsFileTime`, so Windows 8+ is required.
 
 Included in this repository:

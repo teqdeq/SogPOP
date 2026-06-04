@@ -62,6 +62,6 @@ cl /nologo /std:c++17 /EHsc /LD ^
 	third_party\libwebp\src\utils\rescaler_utils.c ^
 	third_party\libwebp\src\utils\thread_utils.c ^
 	third_party\libwebp\src\utils\utils.c ^
-	/link /OUT:Debug\SogPOP.dll
+	/link /OUT:Debug\SogPOP_new.dll
 
 endlocal
