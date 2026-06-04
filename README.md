@@ -18,6 +18,20 @@ Included in this repository:
 - `SogPOP/`: the self-contained CPlusPlus POP project, including vendored dependencies needed to build on another computer
 - `SogPreviewRenderer/`: GLSL preview renderer files for a first-pass Gaussian billboard preview inside TouchDesigner
 
+Rebuilding the DLL on another machine:
+- Prerequisites:
+- Windows 64-bit
+- Visual Studio 2022/2026 with Desktop development with C++
+- MSVC v170 toolset and a Windows 10/11 SDK
+- Use one of these:
+- `SogPOP/build_debug.bat` (outputs `SogPOP/Debug/SogPOP_new.dll`)
+- `SogPOP/build_testdll.bat` (defaults to `SogPOP/Debug/SogPOP_new.dll`, or pass a custom DLL name)
+- Important path note:
+- The batch scripts currently set `VSROOT=C:\Program Files\Microsoft Visual Studio\18\Community`.
+- If Visual Studio is installed in a different location/edition/version, update `VSROOT` in the build script before running.
+- Alternative build path:
+- Open `SogPOP/SogPOP.sln` in Visual Studio, select `Debug|x64` or `Release|x64`, then build the `SogPOP` project.
+
 Excluded from this repository:
 - local build outputs (`Debug/`, `.obj`, `.dll`, `.exe`, `.lib`, `.exp`)
 - local Visual Studio cache/state files
