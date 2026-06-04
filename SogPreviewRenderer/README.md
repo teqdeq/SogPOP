@@ -1,7 +1,7 @@
 # SOG Preview Renderer
 
 This is a TouchDesigner preview renderer for the SogPOP importer.
-It supports anisotropic Gaussian splat orientation using per-point `scale` and `rot` attributes, and adaptive SH view-dependent color evaluation using `sh1` to `sh15` attributes.
+It supports anisotropic Gaussian splat orientation using per-point `InitScale` and `rot` attributes, and adaptive SH view-dependent color evaluation using `sh1` to `sh15` attributes.
 
 Files:
 - `sog_preview.vert`
@@ -22,7 +22,7 @@ Recommended TouchDesigner setup:
    - if you do not see those three fields immediately, widen the parameter dialog or scroll farther down/right on the `Load` tab; they belong to the GLSL MAT itself, not to the shader code
 4. On the GLSL MAT `Attribute` tab:
    - always add:
-   - `Name` = `scale`
+   - `Name` = `InitScale`
    - `Type` = `float3`
    - `Name` = `rot`
    - `Type` = `float4`
@@ -35,7 +35,7 @@ Recommended TouchDesigner setup:
    - do not use the `Matrix Attribute` section for these
 
    Full-capability `sh1..sh15` rows:
-   - `Name` = `scale`
+   - `Name` = `InitScale`
    - `Type` = `float3`
    - `Name` = `rot`
    - `Type` = `float4`
@@ -86,6 +86,29 @@ Recommended TouchDesigner setup:
    - `uShClampMin = 0.0`
    - `uShClampMax = 4.0`
    - `uShDegree = 2.0`
+
+Vectors tab value mapping (important):
+- In TouchDesigner, these uniforms appear in the `Vectors` page with 4 value fields.
+- All uniforms in this shader are `float`, so only `Value 1` (left-most/X) is used.
+- `Value 2`, `Value 3`, and `Value 4` are ignored for these uniforms.
+
+Uniform reference (what each value does):
+- `uScaleMul`: global splat size multiplier before projection. Lower = smaller splats.
+- `uSigmaExtent`: how far each quad extends in sigma units. Lower = tighter splats.
+- `uMinWorldSize`: minimum world-space half-size clamp. Prevents tiny splats disappearing.
+- `uMaxWorldSize`: maximum world-space half-size clamp. Main control to stop giant billboards.
+- `uAnisoAmount`: anisotropy blend (`0` isotropic, `1` fully anisotropic from `InitScale` + `rot`).
+- `uFalloff`: Gaussian falloff width in local splat space. Lower = denser center, faster edge fade.
+- `uAlphaMul`: alpha multiplier after Gaussian. Higher = more opaque/stronger accumulation.
+- `uAlphaGamma`: gamma on alpha (`1` linear). Higher generally thins low-alpha tails.
+- `uColorMul`: multiplies base color intensity before SH mixing.
+- `uSoftClip`: soft edge clipping near splat boundary. Higher = softer cut near radius edge.
+- `uShMix`: SH blend amount (`0` base color only, `1` full SH contribution).
+- `uShIntensity`: SH contribution strength.
+- `uShSaturation`: saturation after SH mix (`0` grayscale, `1` original saturation).
+- `uShClampMin`: minimum RGB clamp after SH/color processing.
+- `uShClampMax`: maximum RGB clamp after SH/color processing.
+- `uShDegree`: SH degree used in shader (`0`, `1`, `2`, `3`). Rounded to nearest integer in shader.
 6. On the GLSL MAT `Common` page:
    - enable `Blending`
    - set source blend to `Source Alpha`
@@ -127,7 +150,7 @@ Automation:
 
 Notes:
 - This preview uses the importer’s `Color` and `alpha` attributes directly.
-- It uses `scale` + `rot` to estimate anisotropic projected covariance and orient each splat ellipse.
+- It uses `InitScale` + `rot` to estimate anisotropic projected covariance and orient each splat ellipse.
 - It evaluates SH view-dependent color from `sh1` to `sh15` and mixes it with the base `Color`.
 - Set `uShDegree` to match your export level from SuperSplat: sh0/sh1/sh2/sh3.
 - Or use the automation script to set `uShDegree` automatically from the importer Info DAT.
